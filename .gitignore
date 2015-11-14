@@ -25,5 +25,9 @@ bower_components
 .DS_Store
 Thumbs.db
 
+# Compiled CSS
+*main.css
+*main.css.map
+
 # Secrets
 *secrets.js
