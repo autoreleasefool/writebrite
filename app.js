@@ -40,6 +40,8 @@ var passportConf = require('./config/passport');
  * Create Express server.
  */
 var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
 /**
  * Connect to MongoDB.
@@ -195,6 +197,18 @@ app.get('/auth/venmo/callback', passport.authorize('venmo', { failureRedirect: '
   res.redirect('/api/venmo');
 });
 
+/**
+ * Handling new socket io connections
+ */
+io.on('connection', function(socket) {
+  socket.emit('greet', { hello: 'Hey there browser!' });
+  socket.on('respond', function(data) {
+    console.log(data);
+  });
+  socket.on('disconnect', function() {
+    console.log('Socket disconnected');
+  });
+});
 
 /**
  * Error Handler.
@@ -204,7 +218,7 @@ app.use(errorHandler());
 /**
  * Start Express server.
  */
-app.listen(app.get('port'), function() {
+server.listen(app.get('port'), function() {
   console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
 });
 
