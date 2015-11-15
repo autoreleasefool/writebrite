@@ -130,6 +130,7 @@ footer {
         border: 0;
         width: 100%;
         height: 100%;
+        padding-bottom: 35px;
     }
     
     input:focus, textarea:focus {
@@ -166,14 +167,14 @@ footer {
         height: 0;
         top: 0;
         margin: 0 auto 0 auto;
-        background-color: #1a1a1a; 
-            
-        -webkit-transition: height 29s linear;
-        -moz-transition: height 29s linear;
-        -ms-transition: height 29s linear;
-        -o-transition: height 29s linear;
-        transition: height 29s linear;
-          
+        background-color: #1a1a1a;      
     }  
-    
+}
+
+.loading-timer {
+    -webkit-transition: height 30s linear;
+    -moz-transition: height 30s linear;
+    -ms-transition: height 30s linear;
+    -o-transition: height 30s linear;
+    transition: height 30s linear;
 }

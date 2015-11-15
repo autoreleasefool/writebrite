@@ -199,7 +199,7 @@ io.on('connection', function(socket) {
       var textColorIndex = Math.random() * 17;
       var initialColorIndex = textColorIndex;
       var isRoom = true;
-      while (!usedColors[textColorIndex]) {
+      while (usedColors[textColorIndex]) {
         textColorIndex = (textColorIndex + 1) % usedColors.length;
         if (textColorIndex == initialColorIndex) {
           isRoom = false;
@@ -210,6 +210,8 @@ io.on('connection', function(socket) {
       if (!isRoom) {
         socket.emit('loginNoRoom', username);
         return;
+      } else {
+        usedColors[textColorIndex] = true;
       }
 
       var userId = guid();
@@ -228,7 +230,11 @@ io.on('connection', function(socket) {
       }
 
       // Send all info to the user about the story
-      io.sockets.emit('onlineUsers', users);
+      usersToSend = [];
+      for (var i = 0; i < users.length; i++) {
+        usersToSend.push({username: users[i].username, textColor: users[i].textColor});
+      }
+      io.sockets.emit('onlineUsers', JSON.stringify(usersToSend));
       socket.emit('acceptLogin', newUser.guid);
       socket.emit('prompt', currentPrompt);
       socket.emit('story', storyBody);
