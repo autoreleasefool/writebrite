@@ -108,6 +108,9 @@ footer {
 
 #story-container {
     
+    position: absolute;
+    width: 100%;
+    height: 100%;
     top: 0;
     padding: 0 0 0 230px;
     background-color: rgba(0,0,0,0);
@@ -115,7 +118,9 @@ footer {
     #padded-story-container {
         max-width: 50em;
         width: 90%;
-        margin: 30px auto 0 auto;
+        margin: 0 auto 0 auto;
+        height: 100%;
+        padding-top: 75px;
     }
     
     input, textarea {

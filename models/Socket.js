@@ -90,7 +90,9 @@ function setListeners(user) {
 }
 
 exports.init = function(options) {
-
+    
+    console.log("Albatraoz");
+    
   var io = options.io;
 
   /**
@@ -98,6 +100,7 @@ exports.init = function(options) {
   */
   io.on('connection', function(socket) {
     console.log('new connection');
+    socket.emit('init');
 
     socket.on('error', function() {
       console.log("Error Occured")
