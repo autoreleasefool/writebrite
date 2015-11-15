@@ -10,15 +10,18 @@
 // -------------------------
 
 html {
-    background-color: #1a1a1a;
+    height: 100%;
     position: relative;
     min-height: 100%;
+    z-index: -1;
 }
-//
-//body {
-//  padding-top: 60px;
-//  margin-bottom: 75px;
-//}
+
+body {
+    height: 100%;
+    background-color: #1a1a1a;
+    color: white;
+    z-index: -1;
+}
 
 footer {
     position: absolute;
@@ -68,33 +71,104 @@ footer {
 // Cole's Super Cool Stuff
 // -------------------------
 
+.albatraoz {
+    height: 100%;
+}
+
 #header-bar {
     height: 50px;
-    width: 105%;
+    width: 100%;
     background-color: #333333;
+}
+
+#side-bar {
+    position: absolute;
+    width: 230px;
+    top: 0;
+    padding-top: 50px;
+    height: 100%;
+    border-right-color: #333333;
+    border-right-width: 10px;
+    border-right-style: solid;
+    
+    .name-tag {
+        padding: 10px 20px 0px 10px;
+        
+        svg {
+            vertical-align: middle;
+        }
+        
+        .name {
+            display: inline;
+            padding-left: 10px;
+        }
+    }
+    
 }
 
 #story-container {
     
-    background-color: black;
+    top: 0;
+    padding: 0 0 0 230px;
+    background-color: rgba(0,0,0,0);
+    
+    #padded-story-container {
+        max-width: 50em;
+        width: 90%;
+        margin: 30px auto 0 auto;
+    }
     
     input, textarea {
+        resize: none;
         background-color: rgba(0,0,0,0);
         border-bottom-color: rgba(0,0,0,0);
         border: 0;
+        width: 100%;
+        height: 100%;
     }
     
     input:focus, textarea:focus {
-        box-shadow: 0 0 0px rgba(0,0,0,0);
+        box-shadow: 0 0 0 rgba(0,0,0,0);
         outline-width: 0;
     }
 }
 
-//#text-bar {
-//    height: 50px; //auto
-//    position: absolute;
-//    bottom: 0px;
-//    width: 100%;
-//    background-color: cadetblue;
-//}
+#loading-bar-wrapper {
+    
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    padding: 65px 0 15px 230px;
+    z-index: -1;
+        
+    #loading-bar {
+        
+        max-width: 53em;
+        width: 93%;
+        top: 0;
+        height: 100%;
+        margin: 0 auto 0 auto;
+        border-style: solid;
+        border-color: aliceblue;
+        border-radius: 20px;
+    }
 
+    #loading-overlay {
+
+        position: absolute;
+        width: 100%;
+        height: 0;
+        top: 0;
+        margin: 0 auto 0 auto;
+        background-color: #1a1a1a; 
+            
+        -webkit-transition: height 29s linear;
+        -moz-transition: height 29s linear;
+        -ms-transition: height 29s linear;
+        -o-transition: height 29s linear;
+        transition: height 29s linear;
+          
+    }  
+    
+}
