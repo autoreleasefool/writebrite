@@ -94,7 +94,7 @@ socket.on('story', function(fullStory) {
 
 socket.on('storyUpdate', function(update) {
     update = JSON.parse(update);
-    storyBody.append("<span style='color:" + update.textColor + "'>" + update.body + "</span>");
+    storyBody.append("<span style='color:" + update.textColor + "'> " + update.body + "</span>");
 
   // addition to the story - append to the end
   // {
