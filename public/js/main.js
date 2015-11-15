@@ -35,8 +35,8 @@ socket.on('onlineUsers', function(users) {
         stringSection5 = "</p></div>";
 
 
-    for(i in users) {
-        var text = stringSection1 + users[i].username + stringSection2 + stringSection3 + users[i].textColor + stringSection4 + users[i].username + stringSection5;
+    for(i in userData) {
+        var text = stringSection1 + userData[i].username + stringSection2 + stringSection3 + userData[i].textColor + stringSection4 + userData[i].username + stringSection5;
         sideBar.append(text);
     }
 
