@@ -1,23 +1,7 @@
 extends layout
 
-
-
 block content
-
-    #header-bar
-
-        img(src="images/logo.png", alt="Logo", height="44px")
-
-    #side-bar
-
-    #story-container
-
-        #padded-story-container
-
-            textarea(placeholder="Albatraoz")
-
-    #loading-bar-wrapper
-
-        #loading-bar
-
-        #loading-overlay
+    ul#messages
+    form(action='')
+        input#m(autocomplete='off')
+        button Send

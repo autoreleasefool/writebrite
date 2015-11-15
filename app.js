@@ -26,9 +26,6 @@ var sass = require('node-sass-middleware');
  * Controllers (route handlers).
  */
 var homeController = require('./controllers/home');
-var userController = require('./controllers/user');
-var apiController = require('./controllers/api');
-var contactController = require('./controllers/contact');
 
 /**
  * API keys and Passport configuration.
@@ -40,8 +37,8 @@ var passportConf = require('./config/passport');
  * Create Express server.
  */
 var app = express();
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 /**
  * Connect to MongoDB.
@@ -107,17 +104,27 @@ app.get('/', homeController.index);
  */
 app.use(errorHandler());
 
+io.on('connection', function(socket) {
+  console.log('a user connected');
+  socket.broadcast.emit('hi');
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
+  });
+  socket.on('chat message', function(msg){
+    io.emit('chat message', msg);
+  });
+});
+
+http.listen(3000, function() {
+io.emit('some event', { for: 'everyone' });
+  console.log('Listening on *:3000');
+})
+
 /**
  * Start Express server.
  */
-var io = server.listen(app.get('port'), function() {
-  console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
-});
-
-/**
- * Initiate socket server
- */
-socket = require('./models/Socket');
-socket.init({io: io});
+// app.listen(app.get('port'), function() {
+//   console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
+// });
 
 module.exports = app;
