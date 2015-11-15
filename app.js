@@ -104,27 +104,172 @@ app.get('/', homeController.index);
  */
 app.use(errorHandler());
 
+// User Model
+var User = function(args) {
+  var self = this;
+
+  // username field
+  self.username = args.username;
+
+  // user's color
+  self.textColor = args.textColor;
+
+  // user's socket
+  self.socket = args.socket;
+
+  // user's id
+  self.guid = args.guid;
+}
+
+// Generate guid
+function guid() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    s4() + '-' + s4() + s4() + s4();
+}
+
+// Text colors for users
+var availableColors = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722', '#9E9E9E', '#607D8B'];
+var usedColors = [];
+for (var i = 0; i < availableColors.length; i++) {
+  usedColors.push(false);
+}
+
+var currentUser = 0;
+var users = [];
+var storyBody = [];
+var lastStoryProgress = '';
+var currentPrompt = '';
+
+function updateStory(data) {
+  if (data) {
+    var update = JSON.parse(data);
+    if (update.guid == users[currentUser].guid) {
+      // Update from valid user
+      io.sockets.emit('storyUpdate', {
+        textColor: users[currentUser].textColor,
+        body: update.body
+      });
+    }
+  } else {
+    io.sockets.emit('storyUpdate', {
+      textColor: users[currentUser].textColor,
+      body: lastStoryProgress
+    });
+  }
+
+  // Begin next user's turn
+  currentUser = (currentUser + 1) % users.length;
+  io.sockets.emit('userTurn', users[currentUser].username);
+  setTimeout(endCurrentTurn, 30000);
+}
+
+function endCurrentTurn() {
+  io.sockets.emit('endTurn', users[currentUser].username);
+  setTimeout(updateStory, 1000);
+}
+
+// Client connected
 io.on('connection', function(socket) {
-  console.log('a user connected');
-  socket.broadcast.emit('hi');
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
+  console.log('A user has connected.');
+
+  socket.on('login', function(username) {
+    console.log('username requested:', username);
+    // Check if the name is a valid string
+    var nameBad = !username || username.length < 3 || username.length > 10 || !(/^[a-z0-9-]+$/i.test(username));
+    if (nameBad) {
+      socket.emit('loginNameBad', username);
+      return;
+    }
+
+    // Check if a user already has the name
+    var nameExists = _.some(users, function(item) {
+      return item.username == username;
+    });
+
+    if (nameExists) {
+      socket.emit('loginNameExists', username);
+      return;
+    } else {
+
+      var textColorIndex = Math.random() * 17;
+      var initialColorIndex = textColorIndex;
+      var isRoom = true;
+      while (!usedColors[textColorIndex]) {
+        textColorIndex = (textColorIndex + 1) % usedColors.length;
+        if (textColorIndex == initialColorIndex) {
+          isRoom = false;
+          break;
+        }
+      }
+
+      if (!isRoom) {
+        socket.emit('loginNoRoom', username);
+        return;
+      }
+
+      var userId = guid();
+      // Create new instance of user model
+      var newUser = new User({
+        username: username,
+        textColor: availableColors[textColorIndex],
+        socket: socket,
+        guid: userId
+      });
+
+      users.push(newUser);
+      if (users.length == 1) {
+        currentUser = 0;
+        setTimeout(endCurrentTurn, 30000);
+      }
+
+      // Send all info to the user about the story
+      io.sockets.emit('onlineUsers', users);
+      socket.emit('acceptLogin', newUser.guid);
+      socket.emit('prompt', currentPrompt);
+      socket.emit('story', storyBody);
+      socket.emit('storyProgress', lastStoryProgress);
+      socket.emit('userTurn', users[currentUser].username);
+    }
   });
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
+
+  socket.on('storyUpdate', function(data) {
+    updateStory(data);
+  });
+
+  socket.on('storyProgress', function(data) {
+    var progress = JSON.parse(data);
+    if (progress.guid == users[currentUser].guid) {
+      // Progress from valid user
+      lastStoryProgress = progress.body;
+      io.sockets.emit('storyProgress', {
+        textColor: users[currentUser].textColor,
+        body: progress.body
+      });
+    }
+  });
+
+  // Client disconnect
+  socket.on('disconnect', function() {
+    console.log('A user has disconnected.');
+    if (users.length > 0) {
+      if (users[currentUser].socket == socket) {
+        users.splice(currentUser, 1);
+        if (currentUser >= users.length) {
+          currentUser = 0;
+        }
+        io.sockets.emit('userTurn', users[currentUser].username);
+      }
+    }
   });
 });
 
 http.listen(3000, function() {
-io.emit('some event', { for: 'everyone' });
   console.log('Listening on *:3000');
 })
-
-/**
- * Start Express server.
- */
-// app.listen(app.get('port'), function() {
-//   console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
-// });
 
 module.exports = app;
