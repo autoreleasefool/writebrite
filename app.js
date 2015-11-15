@@ -103,19 +103,6 @@ app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }))
 app.get('/', homeController.index);
 
 /**
- * Handling new socket io connections
- */
-io.on('connection', function(socket) {
-  socket.emit('greet', { hello: 'Hey there browser!' });
-  socket.on('respond', function(data) {
-    console.log(data);
-  });
-  socket.on('disconnect', function() {
-    console.log('Socket disconnected');
-  });
-});
-
-/**
  * Error Handler.
  */
 app.use(errorHandler());
@@ -123,8 +110,14 @@ app.use(errorHandler());
 /**
  * Start Express server.
  */
-server.listen(app.get('port'), function() {
+var io = server.listen(app.get('port'), function() {
   console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
 });
+
+/**
+ * Initiate socket server
+ */
+socket = require('./models/Socket');
+socket.init({io: io});
 
 module.exports = app;
