@@ -1,9 +1,21 @@
 var socket = io();
+var username = '';
+var guid = '';
 
-$('form').submit(function(){
-  socket.emit('chat message', $('#m').val());
-  $('#m').val('');
-  return false;
+socket.on('loginNameExists', function(data) {
+  console.log('exists');
+});
+
+socket.on('loginNameBad', function(data) {
+  console.log('bad');
+});
+
+socket.on('loginNoRoom', function(data) {
+  console.log('no room');
+});
+
+socket.on('acceptLogin', function(id) {
+  guid = id;
 });
 
 socket.on('onlineUsers', function(users) {
@@ -56,27 +68,16 @@ socket.on('story', function(story) {
 socket.on('storyUpdate', function(update) {
   // addition to the story - append to the end
   // {
-  //   user: {
-  //     username: 'username',
-  //     textColor: '#ffffff'
-  //   },
+  //   textColor: '#ffffff',
   //   body: 'this is an update'
   // }
 });
 
 socket.on('storyProgress', function(progress) {
   // {
-  //   user: {
-  //     username: 'username',
-  //     textColor: '#ffffff'
-  //   },
+  //   textColor: '#ffffff',
   //   body: 'this is the next update'
   // }
-});
-
-
-socket.on('beginTurn', function(beginTurn) {
-  // User's turn begins - start countdown
 });
 
 socket.on('endTurn', function(endTurn) {
@@ -118,8 +119,4 @@ $(document).ready(function() {
     }
 
     $('#loading-bar').css('border-color', userData[0].color);
-
-    setTimeout(test, 1000);
-
-
 });
