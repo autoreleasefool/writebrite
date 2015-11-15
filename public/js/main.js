@@ -105,7 +105,8 @@ socket.on('storyUpdate', function(update) {
 
 socket.on('storyProgress', function(progress) {
     console.log(progress);
-    storyProgress.innerHtml = progress;
+    progress = JSON.parse(progress);
+    storyProgress.innerHtml = "<span style='color:" + progress.textColor + "'>" + progress.body + "</span>";
   // Constant update
   // {
   //   textColor: "#ffffff",
@@ -147,8 +148,8 @@ socket.on('userTurn', function(userTurn) {
             // Update the other users every 3 seconds of typing
             var text = storyArea.val();
             socket.emit('storyProgress', JSON.stringify({body: text, guid: guid}));
+            lastProgressUpdate = seconds;
         }
-        lastProgressUpdate = seconds;
     });
 });
 

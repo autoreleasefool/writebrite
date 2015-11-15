@@ -266,10 +266,10 @@ io.on('connection', function(socket) {
     if (progress.guid == users[currentUser].guid) {
       // Progress from valid user
       lastStoryProgress = progress.body;
-      io.sockets.emit('storyProgress', {
+      io.sockets.emit('storyProgress', JSON.stringify({
         textColor: users[currentUser].textColor,
         body: progress.body
-      });
+      }));
     }
   });
 

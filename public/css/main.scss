@@ -181,3 +181,7 @@ footer {
     -o-transition: height $turn-timer linear;
     transition: height $turn-timer linear;
 }
+
+.invisible {
+  display: none;
+}
