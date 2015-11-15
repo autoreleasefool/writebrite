@@ -142,7 +142,7 @@ for (var i = 0; i < availableColors.length; i++) {
 var currentUser = 0;
 var users = [];
 var storyBody = [];
-var lastStoryProgress = '';
+var lastStoryProgress = {};
 var currentPrompt = '';
 var turnEnded = false;
 var turnLength = 10;
@@ -252,7 +252,7 @@ io.on('connection', function(socket) {
       socket.emit('acceptLogin', newUser.guid);
       socket.emit('prompt', 'Blasphemy!');
       socket.emit('story', storyBody);
-      socket.emit('storyProgress', lastStoryProgress);
+      socket.emit('storyProgress', JSON.stringify(lastStoryProgress));
       socket.emit('userTurn', users[currentUser].username);
     }
   });
@@ -265,7 +265,7 @@ io.on('connection', function(socket) {
     var progress = JSON.parse(data);
     if (progress.guid == users[currentUser].guid) {
       // Progress from valid user
-      lastStoryProgress = progress.body;
+      lastStoryProgress = progress;
       io.sockets.emit('storyProgress', JSON.stringify({
         textColor: users[currentUser].textColor,
         body: progress.body

@@ -106,7 +106,7 @@ socket.on('storyUpdate', function(update) {
 socket.on('storyProgress', function(progress) {
     console.log(progress);
     progress = JSON.parse(progress);
-    storyProgress.innerHtml = "<span style='color:" + progress.textColor + "'>" + progress.body + "</span>";
+    storyProgress.empty().append("<span style='color:" + progress.textColor + "'>" + progress.body + "</span>");
   // Constant update
   // {
   //   textColor: "#ffffff",
@@ -134,23 +134,33 @@ function startTimer(textColor) {
 socket.on('userTurn', function(userTurn) {
     console.log(userTurn);
     // userTurn is a string, username of the user's whose turn is beginning
+    var textColor = '#ffffff';
     for(i in userData) {
         if(userTurn == userData[i].username) {
+            textColor = userData[i].textColor;
             startTimer(userData[i].textColor);
         }
     }
-    storyContainer.append("<textarea id='storyTextArea'></textarea>")
-    storyArea = $('#storyTextArea');
-    storyArea.focus();
-    storyArea.keyup(function() {
-        var seconds = new Date().getTime() / 1000;
-        if (seconds - lastProgressUpdate > 3) {
-            // Update the other users every 3 seconds of typing
-            var text = storyArea.val();
-            socket.emit('storyProgress', JSON.stringify({body: text, guid: guid}));
-            lastProgressUpdate = seconds;
-        }
-    });
+
+    if (username == userTurn) {
+      storyArea = document.getElementById('storyTextArea');
+      if (!storyArea) {
+        var $div = $("<textarea>", {id: "storyTextArea", style: 'color:' + textColor});
+        storyContainer.append($div);
+        storyArea = document.getElementById('storyTextArea');
+      }
+      storyArea.style.color = textColor;
+      storyArea.focus();
+      storyArea.onkeyup = function() {
+          var seconds = new Date().getTime() / 1000;
+          if (seconds - lastProgressUpdate > 1) {
+              // Update the other users every 1 second of typing
+              var text = storyArea.value;
+              socket.emit('storyProgress', JSON.stringify({body: text, guid: guid}));
+              lastProgressUpdate = seconds;
+          }
+      };
+    }
 });
 
 socket.on('endTurn', function(endTurn) {
@@ -167,7 +177,7 @@ socket.on('endTurn', function(endTurn) {
 $(document).ready(function() {
 
     storyPrompt = document.getElementById('prompt-body');
-    storyProgress = document.getElementById('progress-body');
+    storyProgress = $('#progress-body');
 
     username = String(Math.floor(Math.random() * 1000) + 1000);
     function login() {
