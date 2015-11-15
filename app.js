@@ -144,32 +144,46 @@ var users = [];
 var storyBody = [];
 var lastStoryProgress = '';
 var currentPrompt = '';
+var turnEnded = false;
+var turnLength = 10;
 
 function updateStory(data) {
-  if (data) {
-    var update = JSON.parse(data);
-    if (update.guid == users[currentUser].guid) {
-      // Update from valid user
-      io.sockets.emit('storyUpdate', {
-        textColor: users[currentUser].textColor,
-        body: update.body
-      });
+  if (!turnEnded) {
+    turnEnded = true;
+    if (data) {
+      var update = JSON.parse(data);
+      if (users.length > 0 && update.guid == users[currentUser].guid) {
+        // Update from valid user
+        io.sockets.emit('storyUpdate', JSON.stringify({
+          textColor: users[currentUser].textColor,
+          body: update.body
+        }));
+      }
+    } else {
+      if (users.length > 0) {
+        io.sockets.emit('storyUpdate', JSON.stringify({
+          textColor: users[currentUser].textColor,
+          body: lastStoryProgress
+        }));
+      }
     }
-  } else {
-    io.sockets.emit('storyUpdate', {
-      textColor: users[currentUser].textColor,
-      body: lastStoryProgress
-    });
-  }
 
-  // Begin next user's turn
-  currentUser = (currentUser + 1) % users.length;
-  io.sockets.emit('userTurn', users[currentUser].username);
-  setTimeout(endCurrentTurn, 30000);
+    // Begin next user's turn
+    if (users.length > 0) {
+      currentUser = (currentUser + 1) % users.length;
+      io.sockets.emit('userTurn', users[currentUser].username);
+      setTimeout(endCurrentTurn, turnLength * 1000);
+    } else {
+      currentUser = 0;
+    }
+  }
 }
 
 function endCurrentTurn() {
-  io.sockets.emit('endTurn', users[currentUser].username);
+  turnEnded = false;
+  if (users.length > 0) {
+    io.sockets.emit('endTurn', users[currentUser].username);
+  }
   setTimeout(updateStory, 1000);
 }
 
@@ -196,7 +210,7 @@ io.on('connection', function(socket) {
       return;
     } else {
 
-      var textColorIndex = Math.random() * 17;
+      var textColorIndex = Math.floor(Math.random() * 17);
       var initialColorIndex = textColorIndex;
       var isRoom = true;
       while (usedColors[textColorIndex]) {
@@ -226,7 +240,7 @@ io.on('connection', function(socket) {
       users.push(newUser);
       if (users.length == 1) {
         currentUser = 0;
-        setTimeout(endCurrentTurn, 30000);
+        setTimeout(endCurrentTurn, turnLength * 1000);
       }
 
       // Send all info to the user about the story
@@ -236,7 +250,7 @@ io.on('connection', function(socket) {
       }
       io.sockets.emit('onlineUsers', JSON.stringify(usersToSend));
       socket.emit('acceptLogin', newUser.guid);
-      socket.emit('prompt', currentPrompt);
+      socket.emit('prompt', 'Blasphemy!');
       socket.emit('story', storyBody);
       socket.emit('storyProgress', lastStoryProgress);
       socket.emit('userTurn', users[currentUser].username);
@@ -268,7 +282,11 @@ io.on('connection', function(socket) {
         if (currentUser >= users.length) {
           currentUser = 0;
         }
-        io.sockets.emit('userTurn', users[currentUser].username);
+        if (users.length > 0) {
+          io.sockets.emit('userTurn', users[currentUser].username);
+        }
+
+        endCurrentTurn();
       }
     }
   });

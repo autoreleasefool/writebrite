@@ -1,9 +1,12 @@
 var socket = io(),
     storyContainer = $("#padded-story-container"),
-    story = $("#story"),
-    storyProgress = $("#progress"),
+    storyPrompt,
+    storyBody = $("#story-body"),
+    storyProgress,
     userData = '',
-    guid = '';
+    guid = '',
+    username = '',
+    lastProgressUpdate = 0;
 
 socket.on('loginNameExists', function(data) {
   console.log('exists');
@@ -59,7 +62,7 @@ socket.on('onlineUsers', function(users) {
 socket.on('prompt', function(prompt) {
     console.log(prompt);
     // prompt is a string
-    story.append("<h1>" + prompt + "</h1></br></br>")
+    storyPrompt.innerHTML = prompt;
 });
 
 socket.on('story', function(fullStory) {
@@ -89,10 +92,8 @@ socket.on('story', function(fullStory) {
 });
 
 socket.on('storyUpdate', function(update) {
-
-    console.log(update);
-
-    story.append("<p color='" + update.textColor + "'>" + update.body + "</p>");
+    update = JSON.parse(update);
+    storyBody.append("<span style='color:" + update.textColor + "'>" + update.body + "</span>");
 
   // addition to the story - append to the end
   // {
@@ -103,7 +104,7 @@ socket.on('storyUpdate', function(update) {
 
 socket.on('storyProgress', function(progress) {
     console.log(progress);
-    storyProgress.text(progress);
+    storyProgress.innerHtml = progress;
   // Constant update
   // {
   //   textColor: "#ffffff",
@@ -113,11 +114,13 @@ socket.on('storyProgress', function(progress) {
 
 function startTimer(textColor) {
     console.log(textColor);
-    var barOverlay = $("#loading-bar-overlay");
+    var barOverlay = document.getElementById('loading-overlay');
 
     $("#loading-bar").css("border-color", textColor);
-    barOverlay.removeClass("loading-timer");
-    barOverlay.addClass("loading-timer");
+    barOverlay.className = "";
+    barOverlay.style.height = 0;
+    barOverlay.className = "loading-timer";
+    barOverlay.style.height = '100%';
 }
 
 socket.on('userTurn', function(userTurn) {
@@ -129,26 +132,36 @@ socket.on('userTurn', function(userTurn) {
         }
     }
     storyContainer.append("<textarea id='storyTextArea'></textarea>")
+    storyArea = $('#storyTextArea');
+    storyArea.focus();
+    storyArea.keyup(function() {
+        var seconds = new Date().getTime() / 1000;
+        if (seconds - lastProgressUpdate > 3) {
+            // Update the other users every 3 seconds of typing
+            var text = storyArea.val();
+            socket.emit('storyProgress', JSON.stringify({body: text, guid: guid}));
+        }
+        lastProgressUpdate = seconds;
+    });
 });
 
 socket.on('endTurn', function(endTurn) {
     console.log(endTurn);
   // User's turn ends - send back text
-    for(i in userData) {
-        if(endTurn == userData[i].username) {
-            var text = $("#storyTextArea").val();
-            $("#storyTextArea").remove();
-            socket.emit("storyUpdate", text);
-        } else {
-            socket.emit("storyUpdate", storyProgress);
-            storyProgress.text('');
-        }
+    if (username == endTurn) {
+      var text = $("#storyTextArea").val();
+      $("#storyTextArea").remove();
+      socket.emit("storyUpdate", JSON.stringify({body: text, guid: guid}));
     }
 });
 
 
 $(document).ready(function() {
 
+    storyPrompt = document.getElementById('prompt-body');
+    storyProgress = document.getElementById('progress-body');
+
+    username = '1234';
     function login() {
         socket.emit("login", "1234");
     }
