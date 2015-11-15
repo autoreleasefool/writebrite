@@ -135,12 +135,18 @@ socket.on('userTurn', function(userTurn) {
     console.log(userTurn);
     // userTurn is a string, username of the user's whose turn is beginning
     var textColor = '#ffffff';
+    var editIcon;
     for(i in userData) {
+        editIcon = document.getElementById(userData[i].username);
+        editIcon.style.fill = 'grey';
         if(userTurn == userData[i].username) {
             textColor = userData[i].textColor;
             startTimer(userData[i].textColor);
         }
     }
+
+    editIcon = document.getElementById(userTurn);
+    editIcon.style.fill = textColor;
 
     if (username == userTurn) {
       storyArea = document.getElementById('storyTextArea');
