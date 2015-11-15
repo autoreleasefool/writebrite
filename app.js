@@ -139,13 +139,23 @@ for (var i = 0; i < availableColors.length; i++) {
   usedColors.push(false);
 }
 
+function getNewPrompt() {
+  var request = require('request');
+  request('http://ineedaprompt.com/index.php?api', function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      currentPrompt = body;
+    }
+  })
+}
+
 var currentUser = 0;
 var users = [];
 var storyBody = [];
 var lastStoryProgress = {};
-var currentPrompt = '';
 var turnEnded = false;
 var turnLength = 10;
+
+var currentPrompt = getNewPrompt();
 
 function updateStory(data) {
   if (!turnEnded) {
@@ -250,7 +260,7 @@ io.on('connection', function(socket) {
       }
       io.sockets.emit('onlineUsers', JSON.stringify(usersToSend));
       socket.emit('acceptLogin', newUser.guid);
-      socket.emit('prompt', 'Blasphemy!');
+      socket.emit('prompt', currentPrompt);
       socket.emit('story', storyBody);
       socket.emit('storyProgress', JSON.stringify(lastStoryProgress));
       socket.emit('userTurn', users[currentUser].username);

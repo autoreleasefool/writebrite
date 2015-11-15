@@ -106,7 +106,9 @@ socket.on('storyUpdate', function(update) {
 socket.on('storyProgress', function(progress) {
     console.log(progress);
     progress = JSON.parse(progress);
-    storyProgress.empty().append("<span style='color:" + progress.textColor + "'>" + progress.body + "</span>");
+    if (progress.body) {
+      storyProgress.empty().append("<span style='color:" + progress.textColor + "'>" + progress.body + "</span>");
+    }
   // Constant update
   // {
   //   textColor: "#ffffff",
@@ -177,6 +179,8 @@ socket.on('endTurn', function(endTurn) {
       $("#storyTextArea").remove();
       socket.emit("storyUpdate", JSON.stringify({body: text, guid: guid}));
     }
+
+    storyProgress.empty().append("");
 });
 
 
