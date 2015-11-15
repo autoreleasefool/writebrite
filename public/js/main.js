@@ -37,6 +37,7 @@ socket.on('onlineUsers', function(users) {
         stringSection4 = " '> ",
         stringSection5 = "</p></div>";
 
+    sideBar.empty().append('');
 
     for(i in userData) {
         var text = stringSection1 + userData[i].username + stringSection2 + stringSection3 + userData[i].textColor + stringSection4 + userData[i].username + stringSection5;
@@ -112,15 +113,21 @@ socket.on('storyProgress', function(progress) {
   // }
 });
 
+function applyTimer() {
+  var barOverlay = document.getElementById('loading-overlay');
+  barOverlay.className = "loading-timer";
+  barOverlay.style.height = '100%';
+}
+
 function startTimer(textColor) {
     console.log(textColor);
     var barOverlay = document.getElementById('loading-overlay');
 
     $("#loading-bar").css("border-color", textColor);
     barOverlay.className = "";
-    barOverlay.style.height = 0;
-    barOverlay.className = "loading-timer";
-    barOverlay.style.height = '100%';
+    barOverlay.style.height = '0px';
+    setTimeout(applyTimer, 10);
+
 }
 
 socket.on('userTurn', function(userTurn) {
@@ -161,9 +168,9 @@ $(document).ready(function() {
     storyPrompt = document.getElementById('prompt-body');
     storyProgress = document.getElementById('progress-body');
 
-    username = '1234';
+    username = String(Math.floor(Math.random() * 1000) + 1000);
     function login() {
-        socket.emit("login", "1234");
+        socket.emit("login", username);
     }
 
     function test() {
